@@ -21,7 +21,6 @@ class ExplodeTNT extends PrimedTNT
         if (!$ev->isCancelled()) {
             $explosion = new Explosion(Position::fromObject($this->location->add(0, $this->size->getHeight() / 2, 0), $this->getWorld()), $ev->getRadius(), $this);
             $explosion->explodeB();
-            $this->getWorld()->addSound($this->getPosition()->asVector3(), new FizzSound());
         }
     }
 }

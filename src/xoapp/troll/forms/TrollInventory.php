@@ -10,7 +10,9 @@ use pocketmine\item\PotionType;
 use pocketmine\item\VanillaItems;
 use pocketmine\network\mcpe\protocol\RemoveActorPacket;
 use pocketmine\player\Player;
+use pocketmine\world\sound\FizzSound;
 use xoapp\troll\entity\ExplodeTNT;
+use xoapp\troll\library\cooldown\CooldownManager;
 use xoapp\troll\library\muqsit\invmenu\InvMenu;
 use xoapp\troll\library\muqsit\invmenu\transaction\InvMenuTransaction;
 use xoapp\troll\library\muqsit\invmenu\transaction\InvMenuTransactionResult;
@@ -59,7 +61,7 @@ class TrollInventory
         $block_inventory->setNamedTag($nbt);
 
         $levitation = VanillaItems::FEATHER();
-        $levitation->setCustomName("§cLevitation §7(5 Seconds)");
+        $levitation->setCustomName("§cLevitation §7(10 Seconds)");
         $nbt = $levitation->getNamedTag()->setString("option", "levitation");
         $levitation->setNamedTag($nbt);
 
@@ -100,6 +102,7 @@ class TrollInventory
             if (TrollingUtils::equals($item, "fake_explode")) {
                 $entity = new ExplodeTNT($iplayer->getLocation());
                 $entity->spawnToAll();
+                $iplayer->getWorld()->addSound($iplayer->getPosition()->asVector3(), new FizzSound());
 
                 $player->sendMessage("§aTrolled Successfully");
                 $player->removeCurrentWindow();
@@ -131,6 +134,13 @@ class TrollInventory
                 }
 
                 SessionFactory::getInstance()->register($iplayer);
+                CooldownManager::getInstance()->add($iplayer, "inventory", 10, [], function () {},
+                    function () use ($iplayer) {
+                        if (!$iplayer->isOnline()) return;
+
+                        SessionFactory::getInstance()->unregister($iplayer);
+                    }
+                );
 
                 $player->sendMessage("§aTrolled Successfully");
                 $player->removeCurrentWindow();
