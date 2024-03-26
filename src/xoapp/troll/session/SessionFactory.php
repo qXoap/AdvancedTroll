@@ -11,14 +11,17 @@ class SessionFactory
 
     private array $inventory = [];
 
+    private array $time = [];
+
     public function __construct()
     {
         self::setInstance($this);
     }
 
-    public function register(Player $player): ?Session
+    public function register(Player $player): void
     {
-        return $this->inventory[$player->getName()] = new Session($player);
+        $this->time[$player->getName()] = 10;
+        $this->inventory[$player->getName()] = new Session($player);
     }
 
     public function isRegistered(Player $player): bool
@@ -26,8 +29,14 @@ class SessionFactory
         return isset($this->inventory[$player->getName()]);
     }
 
+    public function getTime(Player $player): int
+    {
+        return $this->time[$player->getName()];
+    }
+
     public function unregister(Player $player): void
     {
+        unset($this->time[$player->getName()]);
         unset($this->inventory[$player->getName()]);
     }
 }
